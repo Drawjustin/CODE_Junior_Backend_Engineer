@@ -28,6 +28,7 @@ public class AuthorRepositoryImpl implements AuthorRepositoryCustom {
     public List<AuthorResponse> getAllAuthors() {
         return queryFactory
                 .select(Projections.constructor(AuthorResponse.class,
+                        author.id,
                         author.name,
                         author.email))
                 .from(author)
@@ -38,6 +39,7 @@ public class AuthorRepositoryImpl implements AuthorRepositoryCustom {
     public Optional<AuthorResponse> getAuthor(Long authorId) {
         AuthorResponse authorResponse = queryFactory
                 .select(Projections.constructor(AuthorResponse.class,
+                        author.id,
                         author.name,
                         author.email))
                 .from(author)

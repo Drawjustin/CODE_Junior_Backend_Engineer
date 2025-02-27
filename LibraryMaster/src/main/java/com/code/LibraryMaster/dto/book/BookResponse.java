@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class BookResponse {
+    private Long id;
     private String title;
     private String description;
     private Long isbn;

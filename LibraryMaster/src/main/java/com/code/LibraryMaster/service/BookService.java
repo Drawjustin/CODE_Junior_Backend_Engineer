@@ -2,6 +2,7 @@ package com.code.LibraryMaster.service;
 
 import com.code.LibraryMaster.dto.book.BookCreateRequest;
 import com.code.LibraryMaster.dto.book.BookResponse;
+import com.code.LibraryMaster.dto.book.BookSearchCondition;
 import com.code.LibraryMaster.dto.book.BookUpdateRequest;
 import com.code.LibraryMaster.entity.Author;
 import com.code.LibraryMaster.entity.Book;
@@ -13,6 +14,8 @@ import com.code.LibraryMaster.repository.book.BookRepository;
 import com.code.LibraryMaster.util.BookValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +50,7 @@ public class BookService {
         bookRepository.createBook(newBook);
 
         return BookResponse.builder()
+                .id(newBook.getId())
                 .title(newBook.getTitle())
                 .isbn(newBook.getIsbn())
                 .description(newBook.getDescription())
@@ -61,8 +65,8 @@ public class BookService {
     }
 
     @Transactional
-    public List<BookResponse> findAllBooks() {
-        return bookRepository.getAllBooks();
+    public Page<BookResponse> findAllBooks(BookSearchCondition bookSearchCondition, Pageable pageable) {
+        return bookRepository.getAllBooks(bookSearchCondition, pageable);
     }
 
     @Transactional
@@ -83,6 +87,7 @@ public class BookService {
         book.updateBook(bookUpdateRequest, author);
 
         return BookResponse.builder()
+                .id(book.getId())
                 .title(book.getTitle())
                 .isbn(book.getIsbn())
                 .description(book.getDescription())

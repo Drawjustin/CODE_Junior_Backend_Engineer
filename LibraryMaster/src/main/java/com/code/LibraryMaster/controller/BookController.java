@@ -2,9 +2,12 @@ package com.code.LibraryMaster.controller;
 
 import com.code.LibraryMaster.dto.book.BookCreateRequest;
 import com.code.LibraryMaster.dto.book.BookResponse;
+import com.code.LibraryMaster.dto.book.BookSearchCondition;
 import com.code.LibraryMaster.dto.book.BookUpdateRequest;
 import com.code.LibraryMaster.service.BookService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,8 +23,8 @@ public class BookController {
         return ResponseEntity.ok(bookService.registerBook(bookCreateRequest));
     }
     @GetMapping("")
-    public ResponseEntity<List<BookResponse>> getAllBooks(){
-        return ResponseEntity.ok(bookService.findAllBooks());
+    public ResponseEntity<Page<BookResponse>> getAllBooks(@ModelAttribute BookSearchCondition searchCondition, Pageable pageable){
+        return ResponseEntity.ok(bookService.findAllBooks(searchCondition,pageable));
     }
     @GetMapping("/{id}")
     public ResponseEntity<BookResponse> getBook(@PathVariable("id") Long bookId){

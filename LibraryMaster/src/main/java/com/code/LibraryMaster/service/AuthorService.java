@@ -39,8 +39,9 @@ public class AuthorService {
         authorRepository.createAuthor(newAuthor);
 
         return AuthorResponse.builder()
-                .name(authorCreateRequest.getName())
-                .email(authorCreateRequest.getEmail())
+                .id(newAuthor.getId())
+                .name(newAuthor.getName())
+                .email(newAuthor.getEmail())
                 .build();
     }
 
@@ -68,6 +69,7 @@ public class AuthorService {
         author.updateAuthor(authorUpdateRequest);
 
         return AuthorResponse.builder()
+                .id(author.getId())
                 .name(author.getName())
                 .email(author.getEmail())
                 .build();
