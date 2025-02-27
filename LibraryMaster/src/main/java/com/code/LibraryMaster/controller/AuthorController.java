@@ -20,21 +20,21 @@ public class AuthorController {
     public ResponseEntity<AuthorResponse> createAuthor(@RequestBody AuthorCreateRequest authorCreateRequest){
         return ResponseEntity.ok(authorService.registerAuthor(authorCreateRequest));
     }
-    @GetMapping("/authors")
+    @GetMapping("")
     public ResponseEntity<List<AuthorResponse>> getAllAuthors(){
         return ResponseEntity.ok(authorService.findAllAuthors());
     }
-    @GetMapping("/authors/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<AuthorResponse> getAuthor(@PathVariable("id") Long authorId){
         return ResponseEntity.ok(authorService.findAuthorById(authorId));
     }
-    @PutMapping("/authors/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<AuthorResponse> updateAuthor(@PathVariable("id") Long authorId, @RequestBody AuthorUpdateRequest authorUpdateRequest){
         return ResponseEntity.ok(authorService.modifyAuthorInfo(authorId, authorUpdateRequest));
     }
 
     // TODO : Author를 삭제할 때, 반드시 해당 작가와 연관된 모든 도서를 먼저 삭제해야 한다. 그렇지 않을 시, 삭제 불가
-    @DeleteMapping("/authors/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAuthor(@PathVariable("id") Long authorId){
         authorService.removeAuthor(authorId);
         return ResponseEntity.noContent().build();

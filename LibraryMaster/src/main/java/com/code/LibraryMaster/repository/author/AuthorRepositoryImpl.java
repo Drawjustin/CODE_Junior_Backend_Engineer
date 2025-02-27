@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.code.LibraryMaster.entity.QAuthor.*;
 
@@ -34,14 +35,16 @@ public class AuthorRepositoryImpl implements AuthorRepositoryCustom {
     }
 
     @Override
-    public AuthorResponse getAuthor(Long authorId) {
-        return queryFactory
+    public Optional<AuthorResponse> getAuthor(Long authorId) {
+        AuthorResponse authorResponse = queryFactory
                 .select(Projections.constructor(AuthorResponse.class,
                         author.name,
                         author.email))
                 .from(author)
                 .where(author.id.eq(authorId))
                 .fetchOne();
+
+        return Optional.ofNullable(authorResponse);
     }
 
 

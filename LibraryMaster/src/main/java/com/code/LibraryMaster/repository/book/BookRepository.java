@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long>, BookRepositoryCustom {
     boolean existsByAuthorId(Long authorId);
+    boolean existsByIsbn(Long isbn);
+    boolean existsByIsbnAndIdNot(Long isbn, Long id);
 }

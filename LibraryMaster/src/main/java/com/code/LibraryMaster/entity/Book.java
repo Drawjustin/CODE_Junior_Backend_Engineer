@@ -25,7 +25,7 @@ public class Book {
     private String description;
 
     @Column(unique = true, nullable = false)
-    private String isbn;
+    private Long isbn;
 
     @Column(name = "publication_date", nullable = true)
     private LocalDateTime publicationDate;

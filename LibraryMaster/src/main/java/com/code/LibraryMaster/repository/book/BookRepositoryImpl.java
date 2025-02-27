@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.code.LibraryMaster.entity.QBook.*;
 
@@ -38,8 +39,8 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
     }
 
     @Override
-    public BookResponse getBook(Long bookId) {
-        return queryFactory.select(Projections.constructor(BookResponse.class,
+    public Optional<BookResponse> getBook(Long bookId) {
+        BookResponse bookResponse = queryFactory.select(Projections.constructor(BookResponse.class,
                         book.title,
                         book.description,
                         book.isbn,
@@ -49,5 +50,7 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
                 .innerJoin(book.author)
                 .where(book.id.eq(bookId))
                 .fetchOne();
+
+        return Optional.ofNullable(bookResponse);
     }
 }

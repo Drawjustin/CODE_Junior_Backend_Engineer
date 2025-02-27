@@ -1,13 +1,16 @@
 package com.code.LibraryMaster.service;
 
-import com.code.LibraryMaster.dto.author.AuthorUpdateRequest;
 import com.code.LibraryMaster.dto.book.BookCreateRequest;
 import com.code.LibraryMaster.dto.book.BookResponse;
 import com.code.LibraryMaster.dto.book.BookUpdateRequest;
 import com.code.LibraryMaster.entity.Author;
 import com.code.LibraryMaster.entity.Book;
+import com.code.LibraryMaster.exception.BusinessException;
+import com.code.LibraryMaster.exception.ErrorCode;
+import com.code.LibraryMaster.exception.ErrorCodeCustom;
 import com.code.LibraryMaster.repository.author.AuthorRepository;
 import com.code.LibraryMaster.repository.book.BookRepository;
+import com.code.LibraryMaster.util.BookValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,10 +23,18 @@ import java.util.List;
 public class BookService {
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
+    private final BookValidator bookValidator;
     @Transactional
     public BookResponse registerBook(BookCreateRequest bookCreateRequest) {
+
+        bookValidator.validateBookCreateRequest(bookCreateRequest);
+
+        if (bookRepository.existsByIsbn(bookCreateRequest.getIsbn())) {
+            throw new BusinessException(ErrorCodeCustom.DUPLICATE_ISBN);
+        }
+
         Author author = authorRepository.findById(bookCreateRequest.getAuthor())
-                .orElseThrow(() -> new EntityNotFoundException("Author not found with id: "));
+                .orElseThrow(() -> new BusinessException(ErrorCodeCustom.AUTHOR_NOT_FOUND));
 
         Book newBook = Book.builder()
                 .title(bookCreateRequest.getTitle())
@@ -46,7 +57,7 @@ public class BookService {
 
     @Transactional
     public BookResponse findBookById(Long bookId) {
-        return bookRepository.getBook(bookId);
+        return bookRepository.getBook(bookId).orElseThrow(() -> new BusinessException(ErrorCodeCustom.BOOK_NOT_FOUND));
     }
 
     @Transactional
@@ -57,11 +68,17 @@ public class BookService {
     @Transactional
     public BookResponse modifyBookInfo(Long bookId, BookUpdateRequest bookUpdateRequest) {
 
+        bookValidator.validateBookUpdateRequest(bookUpdateRequest);
+
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new EntityNotFoundException("Book not found with id: "));
+                .orElseThrow(() -> new BusinessException(ErrorCodeCustom.BOOK_NOT_FOUND));
+
+        if (bookRepository.existsByIsbnAndIdNot(bookUpdateRequest.getIsbn(), bookId)) {
+            throw new BusinessException(ErrorCodeCustom.DUPLICATE_ISBN);
+        }
 
         Author author = authorRepository.findById(bookUpdateRequest.getAuthor())
-                .orElseThrow(() -> new EntityNotFoundException("Author not found with id: "));
+                .orElseThrow(() -> new BusinessException(ErrorCodeCustom.AUTHOR_NOT_FOUND));
 
         book.updateBook(bookUpdateRequest, author);
 
@@ -77,7 +94,7 @@ public class BookService {
     @Transactional
     public void removeBook(Long bookId) {
         bookRepository.findById(bookId)
-                .orElseThrow(() -> new EntityNotFoundException("Book not found with id: "));
+                .orElseThrow(() -> new BusinessException(ErrorCodeCustom.BOOK_NOT_FOUND));
 
         bookRepository.deleteById(bookId);
     }

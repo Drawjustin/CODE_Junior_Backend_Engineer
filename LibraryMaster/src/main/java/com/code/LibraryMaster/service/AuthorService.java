@@ -4,8 +4,11 @@ import com.code.LibraryMaster.dto.author.AuthorCreateRequest;
 import com.code.LibraryMaster.dto.author.AuthorResponse;
 import com.code.LibraryMaster.dto.author.AuthorUpdateRequest;
 import com.code.LibraryMaster.entity.Author;
+import com.code.LibraryMaster.exception.BusinessException;
+import com.code.LibraryMaster.exception.ErrorCodeCustom;
 import com.code.LibraryMaster.repository.author.AuthorRepository;
 import com.code.LibraryMaster.repository.book.BookRepository;
+import com.code.LibraryMaster.util.AuthorValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,9 +21,12 @@ import java.util.List;
 public class AuthorService {
     private final AuthorRepository authorRepository;
     private final BookRepository bookRepository;
+    private final AuthorValidator authorValidator;
 
     @Transactional
     public AuthorResponse registerAuthor(AuthorCreateRequest authorCreateRequest) {
+        authorValidator.validateAuthorCreateRequest(authorCreateRequest);
+
         Author newAuthor = Author.builder()
                 .name(authorCreateRequest.getName())
                 .email(authorCreateRequest.getEmail())
@@ -36,7 +42,7 @@ public class AuthorService {
 
     @Transactional
     public AuthorResponse findAuthorById(Long authorId) {
-        return authorRepository.getAuthor(authorId);
+        return authorRepository.getAuthor(authorId).orElseThrow(() -> new BusinessException(ErrorCodeCustom.AUTHOR_NOT_FOUND));
     }
 
     @Transactional
@@ -46,8 +52,14 @@ public class AuthorService {
 
     @Transactional
     public AuthorResponse modifyAuthorInfo(Long authorId, AuthorUpdateRequest authorUpdateRequest) {
+        authorValidator.validateAuthorUpdateRequest(authorUpdateRequest);
+
         Author author = authorRepository.findById(authorId)
-                .orElseThrow(() -> new EntityNotFoundException("Author not found with id: "));
+                .orElseThrow(() -> new BusinessException(ErrorCodeCustom.AUTHOR_NOT_FOUND));
+
+        if (authorRepository.existsByEmailAndIdNot(authorUpdateRequest.getEmail(), authorId)) {
+            throw new BusinessException(ErrorCodeCustom.DUPLICATE_EMAIL);
+        }
 
         author.updateAuthor(authorUpdateRequest);
 
@@ -60,16 +72,12 @@ public class AuthorService {
     @Transactional
     public void removeAuthor(Long authorId) {
         authorRepository.findById(authorId)
-                .orElseThrow(() -> new EntityNotFoundException("Author not found with id: "));
+                .orElseThrow(() -> new BusinessException(ErrorCodeCustom.AUTHOR_NOT_FOUND));
 
         // 연관된 도서가 있는지 확인
-        boolean hasBooks = bookRepository.existsByAuthorId(authorId);
-
-        if (hasBooks) {
-            throw new IllegalStateException("Cannot delete author with ID " + authorId +
-                    " because there are books associated with this author. Remove the books first.");
+        if(bookRepository.existsByAuthorId(authorId)){
+            throw new BusinessException(ErrorCodeCustom.AUTHOR_HAS_BOOKS);
         }
-
 
         authorRepository.deleteById(authorId);
     }

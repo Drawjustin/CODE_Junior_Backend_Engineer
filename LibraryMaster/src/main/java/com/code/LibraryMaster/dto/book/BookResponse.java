@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class BookResponse {
     private String title;
     private String description;
-    private String isbn;
+    private Long isbn;
     private LocalDateTime publicationDate;
     private Long author;
 }
