@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AuthorRepository extends JpaRepository<Author,Long>, AuthorRepositoryCustom{
     boolean existsByEmailAndIdNot(String email, Long authorId);
+    boolean existsByEmail (String email);
 }

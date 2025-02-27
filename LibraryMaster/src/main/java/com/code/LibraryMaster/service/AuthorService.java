@@ -27,6 +27,10 @@ public class AuthorService {
     public AuthorResponse registerAuthor(AuthorCreateRequest authorCreateRequest) {
         authorValidator.validateAuthorCreateRequest(authorCreateRequest);
 
+        if (authorRepository.existsByEmail(authorCreateRequest.getEmail())) {
+            throw new BusinessException(ErrorCodeCustom.DUPLICATE_EMAIL);
+        }
+
         Author newAuthor = Author.builder()
                 .name(authorCreateRequest.getName())
                 .email(authorCreateRequest.getEmail())
