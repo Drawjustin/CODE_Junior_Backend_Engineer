@@ -93,6 +93,7 @@ Content-Type: application/json
 **응답 예시:**
 ```json
 {
+  "id": 1,
   "name": "홍길동",
   "email": "hong@example.com"
 }
@@ -106,10 +107,12 @@ GET /authors
 ```json
 [
   {
+    "id": 1,
     "name": "홍길동",
     "email": "hong@example.com"
   },
   {
+    "id": 2,
     "name": "김철수",
     "email": "kim@example.com"
   }
@@ -123,6 +126,7 @@ GET /authors/1
 **응답 예시:**
 ```json
 {
+  "id": 1,
   "name": "홍길동",
   "email": "hong@example.com"
 }
@@ -141,6 +145,7 @@ Content-Type: application/json
 **응답 예시:**
 ```json
 {
+  "id": 1,
   "name": "홍길동(수정)",
   "email": "hong.updated@example.com"
 }
@@ -174,6 +179,7 @@ Content-Type: application/json
 **응답 예시:**
 ```json
 {
+  "id": 1,
   "title": "예제 도서",
   "description": "도서에 대한 설명",
   "isbn": "1034567890",
@@ -191,6 +197,7 @@ GET /books
 ```json
 [
   {
+    "id": 1,
     "title": "예제 도서",
     "description": "도서에 대한 설명",
     "isbn": "1034567890",
@@ -199,6 +206,7 @@ GET /books
     "authorName": "홍길동"
   },
   {
+    "id": 2,
     "title": "다른 예제 도서",
     "description": "다른 도서에 대한 설명",
     "isbn": "2034567890",
@@ -216,6 +224,7 @@ GET /books/1
 **응답 예시:**
 ```json
 {
+  "id": 1,
   "title": "예제 도서",
   "description": "도서에 대한 설명",
   "isbn": "1034567890",
@@ -241,6 +250,7 @@ Content-Type: application/json
 **응답 예시:**
 ```json
 {
+  "id": 1,
   "title": "수정된 도서 제목",
   "description": "수정된 도서 설명",
   "isbn": "1034567890",
