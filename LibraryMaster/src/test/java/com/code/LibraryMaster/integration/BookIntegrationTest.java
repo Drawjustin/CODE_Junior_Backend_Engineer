@@ -73,14 +73,6 @@ public class BookIntegrationTest {
                 .publicationDate(LocalDateTime.now())
                 .author(createdAuthor.getId())
                 .build();
-        // 도서 생성 요청 데이터 준비
-        bookCreateRequest = BookCreateRequest.builder()
-                .title("테스트 도서")
-                .description("테스트 도서 설명")
-                .isbn(1234567890L)
-                .publicationDate(LocalDateTime.now())
-                .author(createdAuthor.getId())
-                .build();
 
         // 도서 업데이트 요청 데이터 준비
         bookUpdateRequest = BookUpdateRequest.builder()
