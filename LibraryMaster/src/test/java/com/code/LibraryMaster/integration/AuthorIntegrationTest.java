@@ -80,13 +80,13 @@ public class AuthorIntegrationTest {
     void updateAuthor() {
         // 저자 등록
         AuthorResponse createdAuthor = authorService.registerAuthor(createRequest);
-        System.out.println(createdAuthor.getId());
+
         // 저자 수정
         AuthorResponse updatedAuthor = authorService.modifyAuthorInfo(createdAuthor.getId(), updateRequest);
-        System.out.println(updatedAuthor.getId());
+
         // 저장된 ID로 저자 조회
         AuthorResponse foundAuthor = authorService.findAuthorById(updatedAuthor.getId());
-        System.out.println(foundAuthor.getId());
+
         // 검증
         assertThat(foundAuthor.getName()).isEqualTo(updatedAuthor.getName());
         assertThat(foundAuthor.getEmail()).isEqualTo(updatedAuthor.getEmail());
@@ -166,5 +166,58 @@ public class AuthorIntegrationTest {
         List<String> authorNames = authors.stream().map(AuthorResponse::getName).toList();
         assertTrue(authorNames.contains("홍길동"));
         assertTrue(authorNames.contains("김철수"));
+    }
+
+    @Test
+    @DisplayName("저자 등록 실패 - 이름이 빈 문자열")
+    void registerAuthorWithEmptyName() {
+
+        AuthorCreateRequest invalidRequest = AuthorCreateRequest.builder()
+                .name("")
+                .email("test@example.com")
+                .build();
+
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            authorService.registerAuthor(invalidRequest);
+        });
+
+
+        assertEquals(ErrorCodeCustom.AUTHOR_NAME_REQUIRED, exception.getErrorCode());
+    }
+    @Test
+    @DisplayName("저자 등록 실패 - 이름이 null")
+    void registerAuthorWithNullName() {
+        // null 이름으로 저자 생성 요청
+        AuthorCreateRequest invalidRequest = AuthorCreateRequest.builder()
+                .name(null)
+                .email("test@example.com")
+                .build();
+
+        // 예외 발생 검증
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            authorService.registerAuthor(invalidRequest);
+        });
+
+        assertEquals(ErrorCodeCustom.AUTHOR_NAME_REQUIRED, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("저자 수정 실패 - 이메일 형식 오류")
+    void updateAuthorWithInvalidEmail() {
+        // 저자 등록
+        AuthorResponse createdAuthor = authorService.registerAuthor(createRequest);
+
+        // 잘못된 이메일로 수정 요청
+        AuthorUpdateRequest invalidUpdateRequest = AuthorUpdateRequest.builder()
+                .name("홍길동(수정)")
+                .email("invalid.email")
+                .build();
+
+        // 예외 발생 검증
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            authorService.modifyAuthorInfo(createdAuthor.getId(), invalidUpdateRequest);
+        });
+
+        assertEquals(ErrorCodeCustom.INVALID_EMAIL_FORMAT, exception.getErrorCode());
     }
 }

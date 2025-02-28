@@ -136,7 +136,7 @@ public class BookIntegrationTest {
     void duplicateIsbnCheck() {
         // 도서 등록
         bookService.registerBook(bookCreateRequest);
-        
+
         // 동일한 ISBN으로 다른 도서 등록 시도
         BookCreateRequest duplicateRequest = BookCreateRequest.builder()
                 .title("중복 ISBN 도서")
@@ -144,7 +144,7 @@ public class BookIntegrationTest {
                 .isbn(9788956746425L) // 같은 ISBN
                 .author(createdAuthor.getId())
                 .build();
-                
+
         // 예외 발생해야 함
         assertThrows(BusinessException.class, () -> {
             bookService.registerBook(duplicateRequest);
@@ -169,7 +169,7 @@ public class BookIntegrationTest {
     }
 
     @Test
-    @DisplayName("도서 검색 조건 통합 테스트")
+    @DisplayName("도서 검색 조건 통합 테스트 (출판일 기준)")
     void searchBooksByCondition() {
         // 여러 도서 등록
         BookResponse firstBook = bookService.registerBook(bookCreateRequest);
@@ -213,5 +213,99 @@ public class BookIntegrationTest {
         assertThat(oldestFirstResults.getTotalElements()).isEqualTo(2);
         assertThat(oldestFirstResults.getContent().get(0).getId()).isEqualTo(firstBook.getId()); // 오래된 도서가 첫 번째로
         assertThat(oldestFirstResults.getContent().get(1).getId()).isEqualTo(secondBook.getId()); // 최신 도서가 두 번째로
+    }
+    @Test
+    @DisplayName("제목이 빈 문자열인 도서 등록 실패 테스트")
+    void registerBookWithEmptyTitle() {
+        // 빈 제목으로 도서 생성 요청
+        BookCreateRequest invalidRequest = BookCreateRequest.builder()
+                .title("")
+                .description("테스트 설명")
+                .isbn(1234567890L)
+                .author(createdAuthor.getId())
+                .build();
+
+        // 예외 발생 검증
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            bookService.registerBook(invalidRequest);
+        });
+
+        assertEquals(ErrorCodeCustom.BOOK_TITLE_REQUIRED, exception.getErrorCode());
+    }
+    @Test
+    @DisplayName("ISBN 유효성 검증 테스트")
+    void registerBookWithInvalidIsbn() {
+        // 9자리 ISBN (10자리 미만)
+        BookCreateRequest invalidRequest = BookCreateRequest.builder()
+                .title("테스트 도서")
+                .description("테스트 설명")
+                .isbn(123456789L) // 9자리 ISBN
+                .author(createdAuthor.getId())
+                .build();
+
+        // 첫 두자리 유효범위 벗어남 (10~90)
+        BookCreateRequest invalidRequest2 = BookCreateRequest.builder()
+                .title("테스트 도서")
+                .description("테스트 설명")
+                .isbn(9234567890L) // 첫 두자리가 92로 유효범위(10~90) 벗어남
+                .author(createdAuthor.getId())
+                .build();
+
+        // 마지막 자리가 0으로 끝나지 않음
+        BookCreateRequest invalidRequest3 = BookCreateRequest.builder()
+                .title("테스트 도서")
+                .description("설명")
+                .isbn(1234567891L) // 마지막 자리가 유효하지 않은 체크 디지트
+                .author(createdAuthor.getId())
+                .build();
+
+
+        // 예외 발생 검증
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            bookService.registerBook(invalidRequest);
+        });
+
+        // 예외 발생 검증
+        BusinessException exception2 = assertThrows(BusinessException.class, () -> {
+            bookService.registerBook(invalidRequest);
+        });
+
+        // 예외 발생 검증
+        BusinessException exception3 = assertThrows(BusinessException.class, () -> {
+            bookService.registerBook(invalidRequest);
+        });
+
+
+        assertEquals(ErrorCodeCustom.INVALID_ISBN_FORMAT, exception.getErrorCode());
+        assertEquals(ErrorCodeCustom.INVALID_ISBN_FORMAT, exception2.getErrorCode());
+        assertEquals(ErrorCodeCustom.INVALID_ISBN_FORMAT, exception3.getErrorCode());
+
+    }
+
+    @Test
+    @DisplayName("페이지네이션 테스트")
+    void paginationTest() {
+        // 여러 도서 등록 (11개)
+        for (int i = 0; i < 11; i++) {
+            BookCreateRequest request = BookCreateRequest.builder()
+                    .title("도서 " + i)
+                    .description("설명 " + i)
+                    .isbn(1234567890L + i * 10)
+                    .author(createdAuthor.getId())
+                    .build();
+            bookService.registerBook(request);
+        }
+
+        // 첫 번째 페이지(10개 항목) 조회
+        Page<BookResponse> firstPage = bookService.findAllBooks(BookSearchCondition.builder().build(), PageRequest.of(0, 10));
+
+        // 두 번째 페이지(나머지 항목) 조회
+        Page<BookResponse> secondPage = bookService.findAllBooks(BookSearchCondition.builder().build(), PageRequest.of(1, 10));
+
+        // 검증
+        assertThat(firstPage.getTotalElements()).isEqualTo(11);
+        assertThat(firstPage.getContent().size()).isEqualTo(10);
+        assertThat(firstPage.getTotalPages()).isEqualTo(2);
+        assertThat(secondPage.getContent().size()).isEqualTo(1);
     }
 }
