@@ -32,7 +32,6 @@ public class BookValidator {
             throw new BusinessException(ErrorCodeCustom.BOOK_AUTHOR_REQUIRED);
         }
 
-        // 모든 검증을 통과하면 예외 없이 리턴
     }
 
     public void validateBookUpdateRequest(BookUpdateRequest request) {
@@ -58,8 +57,8 @@ public class BookValidator {
     public boolean isValidIsbn10(Long isbn) {
         if (isbn == null) return false;
 
-        // 10자리 숫자인지 확인 (1,000,000,000 ~ 9,999,999,999)
-        if (isbn < 1_000_000_000L || isbn > 9_999_999_999L) return false;
+        // 10자리 숫자인지 확인 (1,000,000,000 ~ 9,099,999,999)
+        if (isbn < 1_000_000_000L || isbn > 9_099_999_999L) return false;
 
         // 첫 두 자리 추출
         long firstTwoDigits = isbn / 100_000_000L;
