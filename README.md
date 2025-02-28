@@ -396,3 +396,4 @@ com.code.LibraryMaster/
 ```bash
 ./gradlew test
 ```
+자세한 결과는 build/reports/tests/test/index.html에서 확인할 수 있습니다.
