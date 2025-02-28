@@ -70,7 +70,7 @@ public class BookIntegrationTest {
                 .title("테스트 도서")
                 .description("테스트 도서 설명")
                 .isbn(1234567890L)
-                .publicationDate(LocalDateTime.now())
+                .publicationDate(LocalDateTime.now().minusDays(1L))
                 .author(createdAuthor.getId())
                 .build();
 
@@ -172,7 +172,7 @@ public class BookIntegrationTest {
     @DisplayName("도서 검색 조건 통합 테스트")
     void searchBooksByCondition() {
         // 여러 도서 등록
-        bookService.registerBook(bookCreateRequest);
+        BookResponse firstBook = bookService.registerBook(bookCreateRequest);
         
         // 다른 저자 생성
         AuthorCreateRequest anotherAuthorRequest = AuthorCreateRequest.builder()
@@ -186,17 +186,32 @@ public class BookIntegrationTest {
                 .title("다른 저자의 도서")
                 .description("다른 설명")
                 .isbn(1234567810L)
+                .publicationDate(LocalDateTime.now())
                 .author(anotherAuthor.getId())
                 .build();
-        bookService.registerBook(anotherBookRequest);
-        
 
-        BookSearchCondition Condition = BookSearchCondition.builder()
+        BookResponse secondBook = bookService.registerBook(anotherBookRequest);
+
+        // 최신순 정렬 조건 (latestFirst = true)
+        BookSearchCondition latestFirstCondition = BookSearchCondition.builder()
                 .latestFirst(true)
                 .build();
-        
-        // 전체 도서 조회
-        Page<BookResponse> allResults = bookService.findAllBooks(Condition, PageRequest.of(0, 10));
-        assertThat(allResults.getTotalElements()).isEqualTo(2);
+
+        // 오래된순 정렬 조건 (latestFirst = false)
+        BookSearchCondition oldestFirstCondition = BookSearchCondition.builder()
+                .latestFirst(false)
+                .build();
+
+        // 최신순 조회 결과 확인
+        Page<BookResponse> latestFirstResults = bookService.findAllBooks(latestFirstCondition, PageRequest.of(0, 10));
+        assertThat(latestFirstResults.getTotalElements()).isEqualTo(2);
+        assertThat(latestFirstResults.getContent().get(0).getId()).isEqualTo(secondBook.getId()); // 최신 도서가 첫 번째로
+        assertThat(latestFirstResults.getContent().get(1).getId()).isEqualTo(firstBook.getId()); // 오래된 도서가 두 번째로
+
+        // 오래된순 조회 결과 확인
+        Page<BookResponse> oldestFirstResults = bookService.findAllBooks(oldestFirstCondition, PageRequest.of(0, 10));
+        assertThat(oldestFirstResults.getTotalElements()).isEqualTo(2);
+        assertThat(oldestFirstResults.getContent().get(0).getId()).isEqualTo(firstBook.getId()); // 오래된 도서가 첫 번째로
+        assertThat(oldestFirstResults.getContent().get(1).getId()).isEqualTo(secondBook.getId()); // 최신 도서가 두 번째로
     }
 }
