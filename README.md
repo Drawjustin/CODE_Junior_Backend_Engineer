@@ -36,7 +36,7 @@ LibraryMaster는 도서와 저자 정보를 관리하는 간단한 RESTful API �
 1. 프로젝트 클론
    ```bash
    git clone https://github.com/Drawjustin/CODE_Junior_Backend_Engineer.git
-   cd CODE_Junior_Backend_Engineer
+   cd CODE_Junior_Backend_Engineer/LibraryMaster
    ```
 
 2. 애플리케이션 빌드
